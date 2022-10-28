@@ -1,0 +1,45 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity"]
+}
+
+datasource db {
+  provider     = "mysql"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  username  String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Score     Score[]
+}
+
+model Game {
+  id       String   @id @default(cuid())
+  gameTime DateTime
+  homeTeam String
+  awayTeam String
+  Score    Score[]
+
+  @@unique([gameTime, homeTeam, awayTeam])
+}
+
+model Score {
+  id            String   @id @default(cuid())
+  homeTeamScore Int
+  awayTeamScore Int
+  userId        String
+  gameId        String
+  user          User     @relation(fields: [userId], references: [id])
+  game          Game     @relation(fields: [gameId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, gameId])
+}
